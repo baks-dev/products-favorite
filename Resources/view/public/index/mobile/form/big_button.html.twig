@@ -1,0 +1,33 @@
+{{ form_start(form, { name: 'public_products_favorite_form' }) }}
+
+
+
+{{ form_widget(form.invariable, { attr: { value: card.product_invariable_id } }) }}
+
+
+{{ form_widget(form.products_favorite, {
+    class: 'btn btn-sm btn-link text-decoration-underline small text-muted delete-product',
+    label: '
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+         class="bi bi-x me-1" viewBox="0 0 16 16">
+        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"></path>
+    </svg> Удалить
+			'}) }}
+
+
+
+
+<!-- <form name="public_products_favorite_form" method="post" action='{3{ path('products-favorite:newedit.new', {
+                }) }}'>
+                    <input hidden type="text" name="invariable" value='{#  #}{ card.product_invariable_id }}'>
+                    <button class="btn btn-sm btn-link text-decoration-underline small text-muted delete-product">-->
+<!-- data-id='item_{#  #}{ card.id }}'-->
+
+<!-- <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+      class="bi bi-x me-1" viewBox="0 0 16 16">
+     <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"></path>
+ </svg>
+ <span class="small">Удалить</span>
+ </button>
+</form>-->
+{{ form_end(form) }}
