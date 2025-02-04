@@ -1,0 +1,29 @@
+<main class="main container px-4">
+    <section id="favorites">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="h4 text-uppercase fw-bolder py-2">Избранное</h1>
+        </div>
+    </section>
+
+    {% if query %}
+        <div class="border rounded-4 container pt-3">
+            <table class="table">
+                <thead>
+                <tr class="small text-muted border-white">
+                    <th scope="col">Продукт</th>
+                    <th>В наличии</th>
+                    <th scope="col">Стоимость</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for card in query %}
+                    {{ include(_self|replace({ "content.html.twig": "card.html.twig" })) }}
+                {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Здесь пока ничего нет</p>
+    {% endif %}
+</main>
