@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Favorite\Controller\Public;
 
 use BaksDev\Core\Controller\AbstractController;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Products\Favorite\Entity\ProductsFavorite;
 use BaksDev\Products\Favorite\UseCase\Public\New\AnonymousProductsFavoriteDTO;
 use BaksDev\Products\Favorite\UseCase\Public\New\AnonymousProductsFavoriteHandler;
@@ -24,9 +23,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[AsController]
 final class NewController extends AbstractController
 {
-    private $str;
-    private $addFlash;
-
+    /** Избранное */
     #[Route('/favorite/new/{invariable}', name: 'newedit.new', methods: ['POST'])]
     public function news(
         Request $request,
@@ -42,19 +39,25 @@ final class NewController extends AbstractController
         {
             $ProductsFavoriteDTO->setUsr($this->getUsr());
         }
-        if($invariable !== null) {
+
+        if($invariable !== null)
+        {
             $ProductsFavoriteDTO->setInvariable($invariable);
         }
 
+        /**
+         * Если аргумент контроллера передается идентификатор UUid - присваиваем Name форме для маппинга данных из Request
+         */
         $formName = $invariable ?? 'public_products_favorite_form';
 
         $form = $formFactory
             ->createNamed(
-                $formName,
-                PublicProductsFavoriteForm::class,
-                $ProductsFavoriteDTO
+                name: $formName,
+                type: PublicProductsFavoriteForm::class,
+                data: $ProductsFavoriteDTO
             )
             ->handleRequest($request);
+
 
         if($form->isSubmitted() && $form->isValid() && $form->has('products_favorite'))
         {
@@ -71,13 +74,11 @@ final class NewController extends AbstractController
             return new JsonResponse(['success' => false]);
         }
 
-        $this->str = 'text';
-        $this->addFlash = $this->addFlash(
+        $this->addFlash(
             'danger',
             'delete.message',
             'favorite'
         );
-        $this->addFlash;
 
         return $this->redirectToRoute('products-favorite:public.index');
     }

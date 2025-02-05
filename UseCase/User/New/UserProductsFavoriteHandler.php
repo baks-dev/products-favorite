@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Favorite\UseCase\User\New;
 
+use BaksDev\Core\Entity\AbstractHandler;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
@@ -14,8 +15,6 @@ use BaksDev\Users\Profile\Group\Messenger\ProfileGroupMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use BaksDev\Products\Favorite\UseCase\User\New\UserProductsFavoriteDTO;
-use BaksDev\Core\Entity\AbstractHandler;
 
 final class UserProductsFavoriteHandler// extends AbstractHandler
 {
@@ -32,7 +31,8 @@ final class UserProductsFavoriteHandler// extends AbstractHandler
     {
         $ProductsFavorite = $this->ProductsFavoriteRepository
             ->user($command->getUsr())
-            ->invariable($command->getInvariable())->find();
+            ->invariable($command->getInvariable())
+            ->find();
 
         if($ProductsFavorite)
         {

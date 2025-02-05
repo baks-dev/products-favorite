@@ -9,14 +9,7 @@ use BaksDev\Users\User\Type\Id\UserUid;
 
 interface ProductsFavoriteAllInterface
 {
-    public function __construct(
-        DBALQueryBuilder $DBALQueryBuilder,
-        PaginatorInterface $paginator,
-    );
-
     public function user(User|UserUid|string $usr): self;
-
-    public function builder(DBALQueryBuilder $dbal): DBALQueryBuilder;
 
     public function findUserPaginator(): PaginatorInterface;
 

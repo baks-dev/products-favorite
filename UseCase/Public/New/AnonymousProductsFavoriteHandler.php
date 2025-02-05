@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Favorite\UseCase\Public\New;
 
-use BaksDev\Products\Favorite\Messenger\ProductsFavoriteMessage;
 use Symfony\Component\HttpFoundation\Exception\SessionNotFoundException;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -14,7 +13,7 @@ final class AnonymousProductsFavoriteHandler
         private RequestStack $requestStack,
     ) {}
 
-    public function handle(AnonymousProductsFavoriteDTO $dto): void
+    public function handle(AnonymousProductsFavoriteDTO $dto): bool
     {
         try
         {
@@ -22,25 +21,39 @@ final class AnonymousProductsFavoriteHandler
         }
         catch(SessionNotFoundException)
         {
-            return;
+            return false;
         }
 
         $favoriteProducts = $session->get('favorite');
+
         if($favoriteProducts)
         {
-            if (!isset($favoriteProducts[(string)$dto->getInvariable()])) {
+            /**
+             * Если идентификатор не найден - добавляем Invariable
+             */
+            if(!isset($favoriteProducts[(string) $dto->getInvariable()]))
+            {
                 $favoriteProducts = [(string) $dto->getInvariable() => (string) $dto->getInvariable()] + $favoriteProducts;
                 $session->set('favorite', $favoriteProducts);
 
-                return;
+                return true;
             }
-            unset($favoriteProducts[(string)$dto->getInvariable()]);
+
+            /**
+             * Удаляем идентификатор из массива добавленного ранее Invariable
+             */
+            unset($favoriteProducts[(string) $dto->getInvariable()]);
             $session->set('favorite', $favoriteProducts);
 
-            return;
+            return true;
         }
 
+        /**
+         * Создаем новый массив избранного
+         */
         $favoriteProducts = [(string) $dto->getInvariable() => (string) $dto->getInvariable()];
         $session->set('favorite', $favoriteProducts);
+
+        return true;
     }
 }

@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Favorite\UseCase\Public\New;
 
+use BaksDev\Products\Favorite\Entity\ProductsFavoriteInterface;
 use BaksDev\Products\Product\Entity\ProductInvariable;
 use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\Validator\Constraints as Assert;
-use BaksDev\Products\Favorite\Entity\ProductsFavoriteInterface;
 
 
 final class AnonymousProductsFavoriteDTO implements ProductsFavoriteInterface

@@ -32,27 +32,32 @@ final class IndexController extends AbstractController
     ): Response
     {
         // Получаем список
-        $user = $this->getUsr();
-        $session = $request->getSession();
-        $query = $allProductsFavorite;
-        if($user === null)
+        $User = $this->getUsr();
+
+        if($User === null)
         {
-            $query = $query->session($session)->findPublicPaginator();
-        } else {
-            $query = $query->user($user)->findUserPaginator();
+            $session = $request->getSession();
+            $query = $allProductsFavorite->session($session)->findPublicPaginator();
+        }
+        else
+        {
+            $query = $allProductsFavorite->user($User)->findUserPaginator();
         }
 
         $forms = [];
+
         foreach($query->getData() as $product)
         {
-            $ProductsFavoriteDTO = new AnonymousProductsFavoriteDTO();
-            $ProductsFavoriteDTO->setInvariable($product['product_invariable_id']);
+            $ProductsFavoriteDTO = new AnonymousProductsFavoriteDTO()
+                ->setInvariable($product['product_invariable_id']);
 
-            $favoriteForm = $formFactory->createNamed(
-                $product['product_invariable_id'],
-                PublicProductsFavoriteForm::class, $ProductsFavoriteDTO,
-                ['action' => $this->generateUrl('products-favorite:newedit.new', ['invariable' => $product['product_invariable_id']])]
-            );
+            $favoriteForm = $formFactory
+                ->createNamed(
+                    name: $product['product_invariable_id'],
+                    type: PublicProductsFavoriteForm::class,
+                    data: $ProductsFavoriteDTO,
+                    options: ['action' => $this->generateUrl('products-favorite:newedit.new', ['invariable' => $product['product_invariable_id']])]
+                );
 
             $forms[$product['product_invariable_id']] = $favoriteForm->createView();
         }

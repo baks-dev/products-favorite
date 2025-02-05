@@ -22,6 +22,7 @@ use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Image\ProductM
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Price\ProductModificationPrice;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Quantity\ProductModificationQuantity;
+use BaksDev\Products\Product\Entity\Offers\Variation\Price\ProductVariationPrice;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
 use BaksDev\Products\Product\Entity\Offers\Variation\Quantity\ProductVariationQuantity;
 use BaksDev\Products\Product\Entity\Photo\ProductPhoto;
@@ -32,8 +33,8 @@ use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\ArrayParameterType;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Session\Session;
-use BaksDev\Products\Product\Entity\Offers\Variation\Price\ProductVariationPrice;
 
 final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 {
@@ -70,8 +71,12 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         return $this;
     }
 
-    public function builder($dbal): DBALQueryBuilder
+    private function builder(): DBALQueryBuilder
     {
+        $dbal = $this->DBALQueryBuilder
+            ->createQueryBuilder(self::class)
+            ->bindLocal();
+
         $dbal->leftJoin(
             'product_invariable',
             Product::class,
@@ -81,6 +86,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         $dbal
             ->addSelect('product_offer.const AS product_offer_const')
+            ->addSelect("product_offer.value as product_offer_value")
             ->leftJoin(
                 'product_invariable',
                 ProductOffer::class,
@@ -90,6 +96,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         $dbal
             ->addSelect('product_variation.const AS product_variation_const')
+            ->addSelect("product_variation.value as product_variation_value")
             ->leftJoin(
                 'product_offer',
                 ProductVariation::class,
@@ -99,6 +106,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         $dbal
             ->addSelect('product_modification.const AS product_modification_const')
+            ->addSelect("product_modification.value as product_modification_value")
             ->leftJoin(
                 'product_variation',
                 ProductModification::class,
@@ -259,7 +267,8 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         /** Наличие для добавления в корзину */
         /* Наличие и резерв торгового предложения */
-        $dbal->leftJoin(
+        $dbal
+            ->leftJoin(
             'product_offer',
             ProductOfferQuantity::class,
             'product_offer_quantity',
@@ -267,7 +276,8 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         );
 
         /* Наличие и резерв множественного варианта */
-        $dbal->leftJoin(
+        $dbal
+            ->leftJoin(
             'product_variation',
             ProductVariationQuantity::class,
             'product_variation_quantity',
@@ -275,6 +285,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         );
 
         $dbal
+
             ->leftJoin(
                 'product_modification',
                 ProductModificationQuantity::class,
@@ -304,6 +315,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 		");
 
         $dbal
+            ->addSelect("product_event.id AS product_event_id")
             ->leftJoin(
                 'product',
                 ProductEvent::class,
@@ -313,7 +325,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         /* Категория товара */
         $dbal
-            ->addSelect("product_event.id AS product_event_id")
+            ->addSelect("product_category.category AS product_category")
             ->leftJoin(
             'product_event',
             ProductCategory::class,
@@ -322,7 +334,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         );
 
         $dbal
-            ->addSelect("product_category.category AS product_category")
+            ->addSelect("category.event AS category_event")
             ->leftJoin(
                 'product_event',
                 CategoryProduct::class,
@@ -331,7 +343,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
             );
 
         $dbal
-            ->addSelect("category.event AS category_event")
+            ->addSelect('category_info.url AS category_url')
             ->leftJoin(
                 'category',
                 CategoryProductInfo::class,
@@ -339,34 +351,29 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'category_info.event = category.event AND category_info.active = true'
             );
 
-        $dbal
-            ->addSelect('category_info.url AS category_url');
 
         $dbal
+            ->addSelect('product_info.url AS product_url')
             ->leftJoin(
                 'product',
                 ProductInfo::class,
                 'product_info',
                 'product_info.product = product.id'
-            )
-            ->addSelect('product_info.url AS product_url');
+            );
 
-        $dbal
-            ->addSelect("product_offer.value as product_offer_value")
-            ->addSelect("product_variation.value as product_variation_value")
-            ->addSelect("product_modification.value as product_modification_value");
 
         return $dbal;
     }
+
     /** Метод возвращает пагинатор ProductsFavorite */
     public function findUserPaginator(): PaginatorInterface
     {
         if(false === $this->usr)
         {
-            throw new \InvalidArgumentException('Invalid Argument User');
+            throw new InvalidArgumentException('Invalid Argument User');
         }
 
-        $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class)->bindLocal();
+        $dbal = $this->builder();
 
         $dbal
             ->from(ProductsFavorite::class, 'favorite')
@@ -375,16 +382,14 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         ;
 
         $dbal
+            ->addSelect('product_invariable.id as product_invariable_id')
             ->addSelect('product_invariable.offer AS product_invariable_offer_const')
             ->leftJoin(
                 'favorite',
                 ProductInvariable::class,
                 'product_invariable',
                 'product_invariable.id = favorite.invariable'
-            )
-            ->addSelect('product_invariable.id as product_invariable_id');
-
-        $dbal = $this->builder($dbal);
+            );
 
         return $this->paginator->fetchAllAssociative($dbal);
     }
@@ -392,15 +397,14 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
     public function findPublicPaginator(): PaginatorInterface
     {
         $favoriteProducts = $this->session->get('favorite') ?? [];
-        $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class)->bindLocal();
+
+        $dbal = $this->builder();
 
         $dbal
             ->addSelect('product_invariable.id as product_invariable_id')
             ->from(ProductInvariable::class, 'product_invariable')
             ->where('product_invariable.id IN (:favoriteProducts)')
             ->setParameter('favoriteProducts', array_values($favoriteProducts), ArrayParameterType::STRING);
-
-        $dbal = $this->builder($dbal);
 
         return $this->paginator->fetchAllAssociative($dbal);
     }
