@@ -53,7 +53,7 @@ final class AddFavoriteFromSessionListener
                 ->user($usr)
                 ->find();
 
-            if(false === $favorite)
+            if(false !== $favorite)
             {
                 continue;
             }
