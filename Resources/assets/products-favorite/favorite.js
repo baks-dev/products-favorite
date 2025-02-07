@@ -22,7 +22,8 @@ function toggleFavorite(svgButton)
 }
 
 let allFavorites = document.querySelectorAll('.favorite');
-allFavorites.forEach(favorite => {
+allFavorites.forEach(favorite =>
+    {
         favorite.addEventListener('click', function(e)
         {
             e.preventDefault();
