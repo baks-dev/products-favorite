@@ -96,6 +96,6 @@ final class ExistProductsFavoriteRepository implements ExistProductsFavoriteInte
             ->andWhere('favorite.invariable = :invariable')
             ->setParameter('invariable', $this->invariable, ProductInvariableUid::TYPE);
 
-        return $dbal->fetchExist();
+        return $dbal->enableCache('products-favorite')->fetchExist();
     }
 }
