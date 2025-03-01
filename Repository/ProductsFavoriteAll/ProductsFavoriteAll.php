@@ -1,5 +1,26 @@
 <?php
-
+/*
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
 
 declare(strict_types=1);
 
@@ -9,6 +30,9 @@ use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
+use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
+use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
+use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
 use BaksDev\Products\Favorite\Entity\ProductsFavorite;
 use BaksDev\Products\Product\Entity\Category\ProductCategory;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
@@ -84,6 +108,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
             'product.id = product_invariable.product'
         );
 
+        /** OFFER */
         $dbal
             ->addSelect('product_offer.const AS product_offer_const')
             ->addSelect("product_offer.value as product_offer_value")
@@ -94,6 +119,17 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'product_offer.event = product.event AND product_offer.const = product_invariable.offer'
             );
 
+        /** Получаем тип торгового предложения */
+        $dbal
+            ->addSelect('category_offer.reference as product_offer_reference')
+            ->leftJoin(
+                'product_offer',
+                CategoryProductOffers::class,
+                'category_offer',
+                'category_offer.id = product_offer.category_offer'
+            );
+
+        /** VARIATION */
         $dbal
             ->addSelect('product_variation.const AS product_variation_const')
             ->addSelect("product_variation.value as product_variation_value")
@@ -104,6 +140,17 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'product_variation.offer = product_offer.id AND product_variation.const = product_invariable.variation'
             );
 
+        /** Получаем тип множественного варианта */
+        $dbal
+            ->addSelect('category_offer_variation.reference as product_variation_reference')
+            ->leftJoin(
+                'product_variation',
+                CategoryProductVariation::class,
+                'category_offer_variation',
+                'category_offer_variation.id = product_variation.category_variation'
+            );
+
+        /** MODIFICATION */
         $dbal
             ->addSelect('product_modification.const AS product_modification_const')
             ->addSelect("product_modification.value as product_modification_value")
@@ -112,6 +159,16 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 ProductModification::class,
                 'product_modification',
                 'product_modification.variation = product_variation.id AND product_modification.const = product_invariable.modification'
+            );
+
+        /** Получаем тип множественного варианта */
+        $dbal
+            ->addSelect('category_offer_modification.reference as product_modification_reference')
+            ->leftJoin(
+                'product_modification',
+                CategoryProductModification::class,
+                'category_offer_modification',
+                'category_offer_modification.id = product_modification.category_modification'
             );
 
         /**  Название */
@@ -269,23 +326,22 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         /* Наличие и резерв торгового предложения */
         $dbal
             ->leftJoin(
-            'product_offer',
-            ProductOfferQuantity::class,
-            'product_offer_quantity',
-            'product_offer_quantity.offer = product_offer.id'
-        );
+                'product_offer',
+                ProductOfferQuantity::class,
+                'product_offer_quantity',
+                'product_offer_quantity.offer = product_offer.id'
+            );
 
         /* Наличие и резерв множественного варианта */
         $dbal
             ->leftJoin(
-            'product_variation',
-            ProductVariationQuantity::class,
-            'product_variation_quantity',
-            'product_variation_quantity.variation = product_variation.id'
-        );
+                'product_variation',
+                ProductVariationQuantity::class,
+                'product_variation_quantity',
+                'product_variation_quantity.variation = product_variation.id'
+            );
 
         $dbal
-
             ->leftJoin(
                 'product_modification',
                 ProductModificationQuantity::class,
@@ -327,11 +383,11 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         $dbal
             ->addSelect("product_category.category AS product_category")
             ->leftJoin(
-            'product_event',
-            ProductCategory::class,
-            'product_category',
-            'product_category.event = product_event.id'
-        );
+                'product_event',
+                ProductCategory::class,
+                'product_category',
+                'product_category.event = product_event.id'
+            );
 
         $dbal
             ->addSelect("category.event AS category_event")
@@ -361,6 +417,35 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'product_info.product = product.id'
             );
 
+        /** Предыдущая стоимость продукта */
+        $dbal->addSelect("
+			COALESCE(
+                NULLIF(product_modification_price.old, 0),
+                NULLIF(product_variation_price.old, 0),
+                NULLIF(product_offer_price.old, 0),
+                NULLIF(product_price.old, 0),
+                0
+            ) AS product_old_price
+		");
+
+        /** Валюта продукта */
+        $dbal->addSelect("
+			CASE
+			   WHEN COALESCE(product_modification_price.price, 0) != 0 
+			   THEN product_modification_price.currency
+			   
+			   WHEN COALESCE(product_variation_price.price, 0) != 0 
+			   THEN product_variation_price.currency
+			   
+			   WHEN COALESCE(product_offer_price.price, 0) != 0 
+			   THEN product_offer_price.currency
+			   
+			   WHEN COALESCE(product_price.price, 0) != 0 
+			   THEN product_price.currency
+			   
+			   ELSE NULL
+			END AS product_currency"
+        );
 
         return $dbal;
     }
@@ -378,8 +463,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         $dbal
             ->from(ProductsFavorite::class, 'favorite')
             ->where('favorite.usr = :usr')
-            ->setParameter('usr', $this->usr, UserUid::TYPE)
-        ;
+            ->setParameter('usr', $this->usr, UserUid::TYPE);
 
         $dbal
             ->addSelect('product_invariable.id as product_invariable_id')
