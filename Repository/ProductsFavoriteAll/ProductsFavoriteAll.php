@@ -110,6 +110,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         /** OFFER */
         $dbal
+            ->addSelect('product_offer.id AS product_offer_id')
             ->addSelect('product_offer.const AS product_offer_const')
             ->addSelect("product_offer.value as product_offer_value")
             ->leftJoin(
@@ -131,6 +132,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         /** VARIATION */
         $dbal
+            ->addSelect('product_variation.id AS product_variation_id')
             ->addSelect('product_variation.const AS product_variation_const')
             ->addSelect("product_variation.value as product_variation_value")
             ->leftJoin(
@@ -152,6 +154,7 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
 
         /** MODIFICATION */
         $dbal
+            ->addSelect('product_modification.id AS product_modification_id')
             ->addSelect('product_modification.const AS product_modification_const')
             ->addSelect("product_modification.value as product_modification_value")
             ->leftJoin(
