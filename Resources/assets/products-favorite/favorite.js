@@ -31,7 +31,7 @@ function addToFavorite(e)
         return;
     }
 
-    let invariable = svgButton.getAttribute('data-invariable');
+    let invariable = svgButton.dataset.invariable;
 
     fetch('/favorite/new/' + invariable, {
         method: 'POST',
