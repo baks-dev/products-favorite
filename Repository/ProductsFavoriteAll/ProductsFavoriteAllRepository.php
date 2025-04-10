@@ -60,7 +60,7 @@ use Doctrine\DBAL\ArrayParameterType;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
+final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterface
 {
     private Session $session;
 
@@ -91,8 +91,56 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
     public function session(Session $session): self
     {
         $this->session = $session;
-
         return $this;
+    }
+
+    /** Метод возвращает пагинатор ProductsFavorite */
+    public function findUserPaginator(): PaginatorInterface
+    {
+
+        if(false === $this->usr)
+        {
+            throw new InvalidArgumentException('Invalid Argument User');
+        }
+
+        $dbal = $this->builder();
+
+        $dbal
+            ->from(ProductsFavorite::class, 'favorite')
+            ->where('favorite.usr = :usr')
+            ->setParameter('usr', $this->usr, UserUid::TYPE);
+
+        $dbal
+            ->addSelect('product_invariable.id as product_invariable_id')
+            ->addSelect('product_invariable.offer AS product_invariable_offer_const')
+            ->leftJoin(
+                'favorite',
+                ProductInvariable::class,
+                'product_invariable',
+                'product_invariable.id = favorite.invariable'
+            );
+
+        $dbal->allGroupByExclude();
+
+        return $this->paginator->fetchAllHydrate($dbal, ProductFavoriteAllResult::class);
+    }
+
+    public function findPublicPaginator(): PaginatorInterface
+    {
+        $favoriteProducts = $this->session->get('favorite') ?? [];
+
+        $dbal = $this->builder();
+
+        $dbal
+            ->addSelect('product_invariable.id as product_invariable_id')
+            ->addSelect('product_invariable.offer AS product_invariable_offer_const')
+            ->from(ProductInvariable::class, 'product_invariable')
+            ->where('product_invariable.id IN (:favoriteProducts)')
+            ->setParameter('favoriteProducts', array_values($favoriteProducts), ArrayParameterType::STRING);
+
+        $dbal->allGroupByExclude();
+
+        return $this->paginator->fetchAllHydrate($dbal, ProductFavoriteAllResult::class);
     }
 
     private function builder(): DBALQueryBuilder
@@ -101,12 +149,15 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
             ->createQueryBuilder(self::class)
             ->bindLocal();
 
-        $dbal->leftJoin(
-            'product_invariable',
-            Product::class,
-            'product',
-            'product.id = product_invariable.product'
-        );
+        $dbal
+            ->addSelect('product.id AS product_id')
+            ->addSelect('product.event AS product_event')
+            ->leftJoin(
+                'product_invariable',
+                Product::class,
+                'product',
+                'product.id = product_invariable.product'
+            );
 
         /** OFFER */
         $dbal
@@ -222,56 +273,44 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
             );
 
         $dbal->addSelect(
-            "
-			CASE
-			
-			    WHEN product_modification_images.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductModificationImage::class)."' , '/', product_modification_images.name)
-			   
-			   WHEN product_variation_images.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductVariationImage::class)."' , '/', product_variation_images.name)
-			   
-			   WHEN product_offer_images.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductOfferImage::class)."' , '/', product_offer_images.name)
-			   
-			   WHEN product_photo.name IS NOT NULL 
-			   THEN CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
-			   
-			   ELSE NULL
-			END AS product_image
-		"
+            "JSON_AGG 
+            (DISTINCT
+				CASE 
+                    WHEN product_offer_images.ext IS NOT NULL 
+                    THEN JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_offer_images.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductOfferImage::class)."' , '/', product_offer_images.name),
+                            'img_ext', product_offer_images.ext,
+                            'img_cdn', product_offer_images.cdn
+                        ) 
+                    WHEN product_variation_images.ext IS NOT NULL 
+                    THEN JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_variation_images.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductVariationImage::class)."' , '/', product_variation_images.name),
+                            'img_ext', product_variation_images.ext,
+                            'img_cdn', product_variation_images.cdn
+                        )	
+                    WHEN product_modification_images.ext IS NOT NULL 
+                    THEN JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_modification_images.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductModificationImage::class)."' , '/', product_modification_images.name),
+                            'img_ext', product_modification_images.ext,
+                            'img_cdn', product_modification_images.cdn
+                        )
+                    WHEN product_photo.ext IS NOT NULL 
+                    THEN JSONB_BUILD_OBJECT
+                        (
+                            'img_root', product_photo.root,
+                            'img', CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name),
+                            'img_ext', product_photo.ext,
+                            'img_cdn', product_photo.cdn
+                        )
+                    END) AS product_images"
         );
-        /** Расширение */
-        $dbal->addSelect("
-			CASE
-			   WHEN product_variation_images.name IS NOT NULL 
-			   THEN product_variation_images.ext
-			   
-			   WHEN product_offer_images.name IS NOT NULL 
-			   THEN product_offer_images.ext
-			   
-			   WHEN product_photo.name IS NOT NULL 
-			   THEN product_photo.ext
-			   
-			   ELSE NULL
-			END AS product_image_ext
-		");
 
-        /** Флаг загрузки файла CDN */
-        $dbal->addSelect("
-			CASE
-			   WHEN product_variation_images.name IS NOT NULL 
-			   THEN product_variation_images.cdn
-					
-			   WHEN product_offer_images.name IS NOT NULL 
-			   THEN product_offer_images.cdn
-					
-			   WHEN product_photo.name IS NOT NULL 
-			   THEN product_photo.cdn
-			   
-			   ELSE NULL
-			END AS product_images_cdn
-		");
 
         /** Цена */
         /* Базовая Цена товара */
@@ -306,28 +345,6 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
             'product_modification_price.modification = product_modification.id'
         );
 
-        /* Стоимость продукта */
-
-        $dbal->addSelect(
-            '
-			CASE
-			   WHEN product_modification_price.price IS NOT NULL AND product_modification_price.price > 0 
-			   THEN product_modification_price.price
-			   
-			   WHEN product_variation_price.price IS NOT NULL AND product_variation_price.price > 0 
-			   THEN product_variation_price.price
-			   
-			   WHEN product_offer_price.price IS NOT NULL AND product_offer_price.price > 0 
-			   THEN product_offer_price.price
-			   
-			   WHEN product_price.price IS NOT NULL AND product_price.price > 0 
-			   THEN product_price.price
-			   
-			   ELSE NULL
-			END AS product_price
-		');
-
-
         /** Наличие для добавления в корзину */
         /* Наличие и резерв торгового предложения */
         $dbal
@@ -355,29 +372,8 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'product_modification_quantity.modification = product_modification.id'
             );
 
-
-        $dbal->addSelect("
-			COALESCE(
-                NULLIF(product_modification_quantity.quantity, 0),
-                NULLIF(product_variation_quantity.quantity, 0),
-                NULLIF(product_offer_quantity.quantity, 0),
-                NULLIF(product_price.quantity, 0),
-                0
-            ) AS product_quantity
-		");
-
-        $dbal->addSelect("
-			COALESCE(
-                NULLIF(product_modification_quantity.reserve, 0),
-                NULLIF(product_variation_quantity.reserve, 0),
-                NULLIF(product_offer_quantity.reserve, 0),
-                NULLIF(product_price.reserve, 0),
-                0
-            ) AS product_reserve
-		");
-
         $dbal
-            ->addSelect("product_event.id AS product_event_id")
+            ->addSelect("product_event.id AS product_event")
             ->leftJoin(
                 'product',
                 ProductEvent::class,
@@ -413,7 +409,6 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'category_info.event = category.event AND category_info.active = true'
             );
 
-
         $dbal
             ->addSelect('product_info.url AS product_url')
             ->leftJoin(
@@ -422,6 +417,47 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
                 'product_info',
                 'product_info.product = product.id'
             );
+
+
+        $dbal->addSelect("
+			COALESCE(
+                NULLIF(product_modification_quantity.quantity, 0),
+                NULLIF(product_variation_quantity.quantity, 0),
+                NULLIF(product_offer_quantity.quantity, 0),
+                NULLIF(product_price.quantity, 0),
+                0
+            ) AS product_quantity
+		");
+
+        $dbal->addSelect("
+			COALESCE(
+                NULLIF(product_modification_quantity.reserve, 0),
+                NULLIF(product_variation_quantity.reserve, 0),
+                NULLIF(product_offer_quantity.reserve, 0),
+                NULLIF(product_price.reserve, 0),
+                0
+            ) AS product_reserve
+		");
+
+        /** Стоимость продукта */
+        $dbal->addSelect(
+            '
+			CASE
+			   WHEN product_modification_price.price IS NOT NULL AND product_modification_price.price > 0 
+			   THEN product_modification_price.price
+			   
+			   WHEN product_variation_price.price IS NOT NULL AND product_variation_price.price > 0 
+			   THEN product_variation_price.price
+			   
+			   WHEN product_offer_price.price IS NOT NULL AND product_offer_price.price > 0 
+			   THEN product_offer_price.price
+			   
+			   WHEN product_price.price IS NOT NULL AND product_price.price > 0 
+			   THEN product_price.price
+			   
+			   ELSE NULL
+			END AS product_price
+		');
 
         /** Предыдущая стоимость продукта */
         $dbal->addSelect("
@@ -456,46 +492,8 @@ final class ProductsFavoriteAll implements ProductsFavoriteAllInterface
         return $dbal;
     }
 
-    /** Метод возвращает пагинатор ProductsFavorite */
-    public function findUserPaginator(): PaginatorInterface
+    public function analyze(): void
     {
-        if(false === $this->usr)
-        {
-            throw new InvalidArgumentException('Invalid Argument User');
-        }
-
-        $dbal = $this->builder();
-
-        $dbal
-            ->from(ProductsFavorite::class, 'favorite')
-            ->where('favorite.usr = :usr')
-            ->setParameter('usr', $this->usr, UserUid::TYPE);
-
-        $dbal
-            ->addSelect('product_invariable.id as product_invariable_id')
-            ->addSelect('product_invariable.offer AS product_invariable_offer_const')
-            ->leftJoin(
-                'favorite',
-                ProductInvariable::class,
-                'product_invariable',
-                'product_invariable.id = favorite.invariable'
-            );
-
-        return $this->paginator->fetchAllAssociative($dbal);
-    }
-
-    public function findPublicPaginator(): PaginatorInterface
-    {
-        $favoriteProducts = $this->session->get('favorite') ?? [];
-
-        $dbal = $this->builder();
-
-        $dbal
-            ->addSelect('product_invariable.id as product_invariable_id')
-            ->from(ProductInvariable::class, 'product_invariable')
-            ->where('product_invariable.id IN (:favoriteProducts)')
-            ->setParameter('favoriteProducts', array_values($favoriteProducts), ArrayParameterType::STRING);
-
-        return $this->paginator->fetchAllAssociative($dbal);
+        $this->builder()->analyze();
     }
 }
