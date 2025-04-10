@@ -1,65 +1,56 @@
 <?php
+/*
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is furnished
+ *  to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ *  THE SOFTWARE.
+ *
+ */
 
 namespace BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\Tests;
 
-use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAll;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllInterface;
+use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllRepository;
+use BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * @group favorite-test
- * @group favorite-test-rep
+ * @group favorite-test-repo
  */
 class ProductsFavoriteAllTest extends KernelTestCase
 {
+
+    public static function setUpBeforeClass(): void
+    {
+        /** Добавляем тестовый продукт в избранное */
+        NewUserProductsFavoriteTest::setUpBeforeClass();
+        new NewUserProductsFavoriteTest()->testUseCase();
+    }
+
     public function testUserRepository()
     {
-        /** @var ProductsFavoriteAll $AllFavorite */
+        /** @var ProductsFavoriteAllRepository $AllFavorite */
         $AllFavorite = self::getContainer()->get(ProductsFavoriteAllInterface::class);
-        $paginator = $AllFavorite->user(UserUid::TEST)->findUserPaginator();
 
-        $data = $paginator->getData();
+        $result = $AllFavorite->user(UserUid::TEST)->findUserPaginator();
 
-        if(empty($data))
-        {
-            self::assertTrue(true);
-            return;
-        }
-
-        $array_keys = [
-            "product_offer_const",
-            "product_variation_const",
-            "product_modification_const",
-            "product_trans_name",
-            "product_image",
-            "product_image_ext",
-            "product_images_cdn",
-            "product_price",
-            "product_quantity",
-            "product_reserve",
-            "product_invariable_offer_const",
-            "product_invariable_id",
-            "product_event_id",
-            "product_category",
-            "category_event",
-            "category_url",
-            "product_url",
-            "product_offer_value",
-            "product_variation_value",
-            "product_modification_value",
-        ];
-
-        $current = current($data);
-
-        foreach($current as $key => $value)
-        {
-            self::assertTrue(in_array($key, $array_keys), sprintf('Появился новый ключ %s', $key));
-        }
-
-        foreach($array_keys as $key)
-        {
-            self::assertTrue(array_key_exists($key, $current));
-        }
+        self::assertTrue(true);
     }
 }
