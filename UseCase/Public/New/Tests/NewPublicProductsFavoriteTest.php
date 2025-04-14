@@ -17,12 +17,14 @@ class NewPublicProductsFavoriteTest extends WebTestCase
 
     public static function testUseCase(): void
     {
+        self::ensureKernelShutdown();
         $client = static::createClient();
 
         $DTO = new AnonymousProductsFavoriteDTO();
         $DTO->setInvariable(ProductInvariableUid::TEST);
 
         $form = Forms::createFormFactory()->create(PublicProductsFavoriteForm::class, $DTO);
+
         $client->request('POST', self::URL, [ $form->getName() =>
             ['invariable' => ProductInvariableUid::TEST]
         ]);

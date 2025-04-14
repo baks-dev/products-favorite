@@ -46,6 +46,8 @@ class NewUserProductsFavoriteTest extends KernelTestCase
         ProductsProductNewTest::setUpBeforeClass();
         new ProductsProductNewTest()->testUseCase();
 
+        self::ensureKernelShutdown();
+
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
@@ -78,8 +80,8 @@ class NewUserProductsFavoriteTest extends KernelTestCase
         $FavoriteDTO->setInvariable(ProductInvariableUid::TEST);
         $FavoriteDTO->setUsr(UserUid::TEST);
 
-        self::assertSame(ProductInvariableUid::TEST, (string)$FavoriteDTO->getInvariable());
-        self::assertSame(UserUid::TEST, (string)$FavoriteDTO->getUsr());
+        self::assertTrue($FavoriteDTO->getInvariable()->equals(ProductInvariableUid::TEST));
+        self::assertTrue($FavoriteDTO->getUsr()->equals(UserUid::TEST));
 
         /** @var UserProductsFavoriteHandler $FavoriteHandler */
         $FavoriteHandler = self::getContainer()->get(UserProductsFavoriteHandler::class);

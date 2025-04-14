@@ -31,17 +31,10 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * @group products-favorite
- * @depends BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest
+ * @depends BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest::class
  */
 class ProductsFavoriteAllTest extends KernelTestCase
 {
-
-    //    public static function setUpBeforeClass(): void
-    //    {
-    //        /** Добавляем тестовый продукт в избранное */
-    //        NewUserProductsFavoriteTest::setUpBeforeClass();
-    //        new NewUserProductsFavoriteTest()->testUseCase();
-    //    }
 
     public function testUserRepository()
     {
