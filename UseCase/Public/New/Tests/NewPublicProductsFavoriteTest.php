@@ -9,8 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Form\Forms;
 
 /**
- * @group favorite-test
- * @group favorite-test-uc
+ * @group products-favorite
  */
 class NewPublicProductsFavoriteTest extends WebTestCase
 {
@@ -18,11 +17,6 @@ class NewPublicProductsFavoriteTest extends WebTestCase
 
     public static function testUseCase(): void
     {
-        /* TODO: !!! */
-        self::assertTrue(true);
-        return;
-
-
         $client = static::createClient();
 
         $DTO = new AnonymousProductsFavoriteDTO();

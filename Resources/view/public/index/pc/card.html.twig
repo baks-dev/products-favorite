@@ -1,3 +1,4 @@
+{# @var card \BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductFavoriteAllResult #}
 
 <tr id='item_'>
     <td>
@@ -7,19 +8,19 @@
                 {# Обложка  #}
                 {% set image_path = '/assets/img/blank.svg' %}
 
-                {% if card.product_image_ext is defined and card.product_image_ext is not null %}
+                {# {% if card.ext is defined and card.product_image_ext is not null %}
                     {% set img_host = card.product_images_cdn == true  ? CDN_HOST : '' %}
                     {% set img_dir = card.product_image %}
                     {% set img_file = (img_host is empty ? '/image.' : '/small.') ~ card.product_image_ext %}
                     {% set image_path = img_host ~ img_dir ~ img_file %}
-                {% endif %}
+                {% endif %} #}
 
                 <a href="{{ path('products-product:user.detail', {
-                    category: card.category_url,
-                    url: card.product_url,
-                    offer: card.product_offer_value,
-                    variation: card.product_variation_value,
-                    modification: card.product_modification_value
+                    category: card.categoryUrl,
+                    url: card.productUrl,
+                    offer: card.productOfferValue,
+                    variation: card.productVariationValue,
+                    modification: card.productModificationValue
                 }) }}" class="icon rounded-4 mb-2 lazy bg-contain p-1"
                    data-bg="{{ image_path }}"
                    style="width: 75px; height: 75px;"
@@ -30,14 +31,14 @@
             <div class="col align-self-center">
 
                 <a href="{{ path('products-product:user.detail', {
-                    category: card.category_url,
-                    url: card.product_url,
-                    offer: card.product_offer_value,
-                    variation: card.product_variation_value,
-                    modification: card.product_modification_value
+                    category: card.categoryUrl,
+                    url: card.productUrl,
+                    offer: card.productOfferValue,
+                    variation: card.productVariationValue,
+                    modification: card.productModificationValue
                 }) }}" class="text-dark me-3 text-uppercase text-decoration-none">
 
-                    {{ card.product_trans_name }}U
+                    {{ card.productName }}
                 </a>
             </div>
         </div>
@@ -45,9 +46,9 @@
     </td>
 
     <td class="vertical-middle">
-        {%  if card.product_quantity == 0 %}
+        {% if card.productQuantity == 0 %}
             Нет
-        {% elseif card.product_quantity < 20 %}
+        {% elseif card.productQuantity < 20 %}
             < 20
         {% else %}
             > 20
@@ -55,11 +56,11 @@
     </td>
 
     <td class="vertical-middle">
-        {{ card.product_price }}
+        {{ card.productPrice }}
     </td>
 
     <td class="vertical-middle text-end">
-        {{ include(_self|replace({ "card.html.twig": "form/big_button.html.twig" }), { form : forms[card.product_invariable_id] }) }}
+        {{ include(_self|replace({ "card.html.twig" : "form/big_button.html.twig" }), { form : forms[card.productInvariableId|trans] }) }}
     </td>
 
 </tr>

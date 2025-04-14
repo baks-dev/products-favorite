@@ -8,8 +8,7 @@ use BaksDev\Users\User\Tests\TestUserAccount;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
- * @group favorite-test
- * @group favorite-test-contr
+ * @group products-favorite
  */
 final class IndexControllerTest extends WebTestCase
 {

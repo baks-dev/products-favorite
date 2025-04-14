@@ -26,23 +26,22 @@ namespace BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\Tests;
 
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllInterface;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllRepository;
-use BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * @group favorite-test
- * @group favorite-test-repo
+ * @group products-favorite
+ * @depends BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest
  */
 class ProductsFavoriteAllTest extends KernelTestCase
 {
 
-    public static function setUpBeforeClass(): void
-    {
-        /** Добавляем тестовый продукт в избранное */
-        NewUserProductsFavoriteTest::setUpBeforeClass();
-        new NewUserProductsFavoriteTest()->testUseCase();
-    }
+    //    public static function setUpBeforeClass(): void
+    //    {
+    //        /** Добавляем тестовый продукт в избранное */
+    //        NewUserProductsFavoriteTest::setUpBeforeClass();
+    //        new NewUserProductsFavoriteTest()->testUseCase();
+    //    }
 
     public function testUserRepository()
     {

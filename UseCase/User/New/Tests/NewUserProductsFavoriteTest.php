@@ -36,8 +36,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * @group product-favorite
- * @group product-favorite-usecase
+ * @group products-favorite
  */
 class NewUserProductsFavoriteTest extends KernelTestCase
 {
@@ -50,7 +49,9 @@ class NewUserProductsFavoriteTest extends KernelTestCase
         /** @var EntityManagerInterface $em */
         $em = self::getContainer()->get(EntityManagerInterface::class);
 
-        $testInvariable = $em->getRepository(ProductInvariable::class)->find(ProductInvariableUid::TEST);
+        $testInvariable = $em
+            ->getRepository(ProductInvariable::class)
+            ->find(ProductInvariableUid::TEST);
 
         self::assertInstanceOf(ProductInvariable::class, $testInvariable, 'ProductInvariable с тестовым ID не найден');
 
