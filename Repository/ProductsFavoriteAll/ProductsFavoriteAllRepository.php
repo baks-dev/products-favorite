@@ -388,7 +388,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_event',
                 ProductCategory::class,
                 'product_category',
-                'product_category.event = product_event.id'
+                'product_category.event = product_event.id AND product_category.root IS TRUE'
             );
 
         $dbal
