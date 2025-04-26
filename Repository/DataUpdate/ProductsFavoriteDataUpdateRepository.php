@@ -69,13 +69,21 @@ final class ProductsFavoriteDataUpdateRepository implements ProductsFavoriteData
 
         $orm
             ->where('favorite.usr = :usr')
-            ->setParameter('usr', $this->usr, UserUid::TYPE);
+            ->setParameter(
+                key: 'usr',
+                value: $this->usr,
+                type: UserUid::TYPE
+            );
 
         $orm
             ->andWhere('favorite.invariable = :invariable')
-            ->setParameter('invariable', $this->invariable, ProductInvariableUid::TYPE);
+            ->setParameter(
+                key: 'invariable',
+                value: $this->invariable,
+                type: ProductInvariableUid::TYPE
+            );
 
-        return $orm->getQuery()->getOneOrNullResult() ?: false;
+        return $orm->getOneOrNullResult() ?: false;
     }
 
 }
