@@ -265,30 +265,26 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
 
     public function getProductPrice(): Money
     {
-        // без применения скидки в профиле пользователя
-        if(is_null($this->profile_discount))
-        {
-            return new Money($this->product_price, true);
-        }
+        $price = new Money($this->product_price, true);
 
         // применяем скидку пользователя из профиля
-        $price = new Money($this->product_price, true);
-        $price->applyPercent($this->profile_discount);
+        if(false === is_null($this->profile_discount))
+        {
+            $price->applyPercent($this->profile_discount);
+        }
 
         return $price;
     }
 
     public function getProductOldPrice(): Money
     {
-        // без применения скидки в профиле пользователя
-        if(is_null($this->profile_discount))
-        {
-            return new Money($this->product_old_price, true);
-        }
+        $price = new Money($this->product_old_price, true);
 
         // применяем скидку пользователя из профиля
-        $price = new Money($this->product_old_price, true);
-        $price->applyPercent($this->profile_discount);
+        if(false === is_null($this->profile_discount))
+        {
+            $price->applyPercent($this->profile_discount);
+        }
 
         return $price;
     }
