@@ -54,6 +54,11 @@ use BaksDev\Products\Product\Entity\Price\ProductPrice;
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Entity\ProductInvariable;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
+use BaksDev\Users\Profile\UserProfile\Entity\Info\UserProfileInfo;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\Profile\UserProfile\Type\UserProfileStatus\Status\UserProfileStatusActive;
+use BaksDev\Users\Profile\UserProfile\Type\UserProfileStatus\UserProfileStatus;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\ArrayParameterType;
@@ -69,6 +74,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
         private readonly PaginatorInterface $paginator,
+        private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
     ) {}
 
     public function user(User|UserUid|string $usr): self
@@ -417,6 +423,36 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_info',
                 'product_info.product = product.id'
             );
+
+        /** Персональная скидка из профиля авторизованного пользователя */
+        if(true === $this->userProfileTokenStorage->isUser())
+        {
+            $profile = $this->userProfileTokenStorage->getProfileCurrent();
+
+            if($profile instanceof UserProfileUid)
+            {
+                $dbal
+                    ->addSelect('profile_info.discount AS profile_discount')
+                    ->leftJoin(
+                        'product',
+                        UserProfileInfo::class,
+                        'profile_info',
+                        '
+                        profile_info.profile = :profile AND 
+                        profile_info.status = :profile_status'
+                    )
+                    ->setParameter(
+                        key: 'profile',
+                        value: $profile,
+                        type: UserProfileUid::TYPE)
+                    /** Активный статус профиля */
+                    ->setParameter(
+                        key: 'profile_status',
+                        value: UserProfileStatusActive::class,
+                        type: UserProfileStatus::TYPE
+                    );
+            }
+        }
 
 
         $dbal->addSelect("

@@ -76,6 +76,9 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         private int|null $product_reserve,
         private int|null $product_old_price,
         private string|null $product_currency,
+
+        private int|null $profile_discount = null,
+
     ) {}
 
     public function getProductId(): ProductUid
@@ -200,6 +203,16 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
 
     public function getProductImages(): array|null
     {
+        if(is_null($this->product_images))
+        {
+            return null;
+        }
+
+        if(false === json_validate($this->product_images))
+        {
+            return null;
+        }
+
         $images = json_decode($this->product_images, true, 512, JSON_THROW_ON_ERROR);
 
         if(null === current($images))
@@ -252,7 +265,32 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
 
     public function getProductPrice(): Money
     {
-        return new Money($this->product_price, true);
+        // без применения скидки в профиле пользователя
+        if(is_null($this->profile_discount))
+        {
+            return new Money($this->product_price, true);
+        }
+
+        // применяем скидку пользователя из профиля
+        $price = new Money($this->product_price, true);
+        $price->applyPercent($this->profile_discount);
+
+        return $price;
+    }
+
+    public function getProductOldPrice(): Money
+    {
+        // без применения скидки в профиле пользователя
+        if(is_null($this->profile_discount))
+        {
+            return new Money($this->product_old_price, true);
+        }
+
+        // применяем скидку пользователя из профиля
+        $price = new Money($this->product_old_price, true);
+        $price->applyPercent($this->profile_discount);
+
+        return $price;
     }
 
     public function getProductQuantity(): int|null
@@ -265,14 +303,14 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         return $this->product_reserve;
     }
 
-    public function getProductOldPrice(): Money
-    {
-        return new Money($this->product_old_price, true);
-    }
-
     public function getProductCurrency(): Currency
     {
         return new Currency($this->product_currency);
+    }
+
+    public function getProfileDiscount(): ?int
+    {
+        return $this->profile_discount;
     }
 
     /** Методы - заглушки */
@@ -311,6 +349,7 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
     {
         return false;
     }
+
 }
 
 
