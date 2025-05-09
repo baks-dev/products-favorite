@@ -77,7 +77,7 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         private int|null $product_old_price,
         private string|null $product_currency,
 
-        private int|null $profile_discount = null,
+        private string|null $profile_discount = null,
 
     ) {}
 
@@ -268,9 +268,9 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         $price = new Money($this->product_price, true);
 
         // применяем скидку пользователя из профиля
-        if(false === is_null($this->profile_discount))
+        if(false === empty($this->profile_discount))
         {
-            $price->applyPercent($this->profile_discount);
+            $price->applyString($this->profile_discount);
         }
 
         return $price;
@@ -281,9 +281,9 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         $price = new Money($this->product_old_price, true);
 
         // применяем скидку пользователя из профиля
-        if(false === is_null($this->profile_discount))
+        if(false === empty($this->profile_discount))
         {
-            $price->applyPercent($this->profile_discount);
+            $price->applyString($this->profile_discount);
         }
 
         return $price;
