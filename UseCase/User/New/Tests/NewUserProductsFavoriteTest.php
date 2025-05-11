@@ -30,7 +30,7 @@ use BaksDev\Products\Favorite\UseCase\User\New\UserProductsFavoriteDTO;
 use BaksDev\Products\Favorite\UseCase\User\New\UserProductsFavoriteHandler;
 use BaksDev\Products\Product\Entity\ProductInvariable;
 use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
-use BaksDev\Products\Product\UseCase\Admin\NewEdit\Tests\ProductsProductNewTest;
+use BaksDev\Products\Product\UseCase\Admin\NewEdit\Tests\ProductsProductNewAdminUseCaseTest;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -43,8 +43,8 @@ class NewUserProductsFavoriteTest extends KernelTestCase
     public static function setUpBeforeClass(): void
     {
         /** Создаем тестовый продукт */
-        ProductsProductNewTest::setUpBeforeClass();
-        new ProductsProductNewTest()->testUseCase();
+        ProductsProductNewAdminUseCaseTest::setUpBeforeClass();
+        new ProductsProductNewAdminUseCaseTest()->testUseCase();
 
         self::ensureKernelShutdown();
 

@@ -15,7 +15,7 @@
                     {% set image_path = img_host ~ img_dir ~ img_file %}
                 {% endif %} #}
 
-                <a href="{{ path('products-product:user.detail', {
+                <a href="{{ path('products-product:public.detail', {
                     category: card.categoryUrl,
                     url: card.productUrl,
                     offer: card.productOfferValue,
@@ -30,7 +30,7 @@
 
             <div class="col align-self-center">
 
-                <a href="{{ path('products-product:user.detail', {
+                <a href="{{ path('products-product:public.detail', {
                     category: card.categoryUrl,
                     url: card.productUrl,
                     offer: card.productOfferValue,
