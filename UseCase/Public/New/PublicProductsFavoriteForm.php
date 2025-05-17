@@ -15,7 +15,7 @@ final class PublicProductsFavoriteForm extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('invariable', HiddenType::class, ['required' => true]);
+        $builder->add('invariable', HiddenType::class, ['required' => false]);
 
         /* Сохранить ******************************************************/
         $builder->add(
