@@ -59,8 +59,10 @@
         {{ card.productPrice }}
     </td>
 
-    <td class="vertical-middle text-end">
-        {{ include(_self|replace({ "card.html.twig" : "form/big_button.html.twig" }), { form : forms[card.productInvariableId|trans] }) }}
-    </td>
+    {% if not is_shared %}
+        <td class="vertical-middle text-end">
+            {{ include(_self|replace({ "card.html.twig" : "form/big_button.html.twig" }), { form : forms[card.productInvariableId|trans] }) }}
+        </td>
+    {% endif %}
 
 </tr>
