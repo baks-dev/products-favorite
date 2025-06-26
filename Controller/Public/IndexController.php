@@ -26,16 +26,20 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Favorite\Controller\Public;
 
+use BaksDev\Core\Cache\AppCacheInterface;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductFavoriteAllResult;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllInterface;
 use BaksDev\Products\Favorite\UseCase\Public\New\AnonymousProductsFavoriteDTO;
 use BaksDev\Products\Favorite\UseCase\Public\New\PublicProductsFavoriteForm;
+use Random\Randomizer;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
 use Symfony\Component\Routing\Attribute\Route;
+use BaksDev\Users\User\Entity\User;
 
 #[AsController]
 final class IndexController extends AbstractController
@@ -45,11 +49,23 @@ final class IndexController extends AbstractController
         Request $request,
         ProductsFavoriteAllInterface $allProductsFavorite,
         FormFactoryInterface $formFactory,
-        int $page = 0
+        AppCacheInterface $cache,
+        int $page = 0,
+        #[MapQueryParameter] string|null $share = null,
     ): Response
     {
         // Получаем список
         $User = $this->getUsr();
+
+        $AppCache = $cache->init('products-favorite');
+
+        if(is_null($share) === false)
+        {
+            if($AppCache->hasItem($share))
+            {
+                $User = new User($AppCache->getItem($share)->get());
+            }
+        }
 
         if($User === null)
         {
@@ -58,6 +74,14 @@ final class IndexController extends AbstractController
         }
         else
         {
+            $salt = new Randomizer()->getBytes(16);
+            $key = md5($request->getClientIp().$request->headers->get('USER-AGENT').$salt);
+
+            $cacheItem = $AppCache->getItem($key);
+            $cacheItem->set((string) $User);
+
+            $AppCache->save($cacheItem);
+
             $query = $allProductsFavorite->user($User)->findUserPaginator();
         }
 
@@ -82,11 +106,12 @@ final class IndexController extends AbstractController
             $forms[$invariable] = $favoriteForm->createView();
         }
 
-
         return $this->render(
             [
                 'query' => $query->getData(),
                 'forms' => $forms,
+                'share' => empty($key) === true ? null : $key,
+                'is_shared' => is_null($share) === false,
             ]
         );
     }
