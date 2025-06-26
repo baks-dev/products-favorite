@@ -27,7 +27,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Favorite\Repository\ProductsFavoriteAll;
 
 use BaksDev\Products\Category\Type\Event\CategoryProductEventUid;
-use BaksDev\Products\Product\Repository\Cards\ProductCardResultInterface;
+use BaksDev\Products\Product\Repository\Cards\ProductCardResultInterfaceProduct;
 use BaksDev\Products\Product\Type\Event\ProductEventUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
@@ -43,7 +43,7 @@ use Symfony\Component\DependencyInjection\Attribute\Exclude;
 
 /** @see ProductsFavoriteAllRepository */
 #[Exclude]
-final readonly class ProductFavoriteAllResult implements ProductCardResultInterface
+final readonly class ProductFavoriteAllResult implements ProductCardResultInterfaceProduct
 {
     public function __construct(
         private string $product_id,
@@ -78,6 +78,7 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         private string|null $product_currency,
 
         private string|null $profile_discount = null,
+        private string|null $project_discount = null,
 
     ) {}
 
@@ -272,7 +273,13 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
 
         $price = new Money($this->product_price, true);
 
-        // применяем скидку пользователя из профиля
+        /** Скидка магазина */
+        if(false === empty($this->project_discount))
+        {
+            $price->applyString($this->project_discount);
+        }
+
+        /** Скидка пользователя */
         if(false === empty($this->profile_discount))
         {
             $price->applyString($this->profile_discount);
@@ -290,7 +297,13 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
 
         $price = new Money($this->product_old_price, true);
 
-        // применяем скидку пользователя из профиля
+        /** Скидка магазина */
+        if(false === empty($this->project_discount))
+        {
+            $price->applyString($this->project_discount);
+        }
+
+        /** Скидка пользователя */
         if(false === empty($this->profile_discount))
         {
             $price->applyString($this->profile_discount);
