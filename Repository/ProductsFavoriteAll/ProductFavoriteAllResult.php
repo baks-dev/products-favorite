@@ -77,6 +77,9 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         private int|null $product_old_price,
         private string|null $product_currency,
 
+        private ?bool $promotion_active = null,
+        private string|int|null $promotion_price = null,
+
         private string|null $profile_discount = null,
         private string|null $project_discount = null,
 
@@ -271,7 +274,14 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
             return false;
         }
 
+        /** Оригинальная цена */
         $price = new Money($this->product_price, true);
+
+        /** Кастомная цена */
+        if(false === empty($this->promotion_price) && true === $this->promotion_active)
+        {
+            $price->applyString($this->promotion_price);
+        }
 
         /** Скидка магазина */
         if(false === empty($this->project_discount))
@@ -296,6 +306,12 @@ final readonly class ProductFavoriteAllResult implements ProductCardResultInterf
         }
 
         $price = new Money($this->product_old_price, true);
+
+        /** Кастомная цена */
+        if(false === empty($this->promotion_price) && true === $this->promotion_active)
+        {
+            $price->applyString($this->promotion_price);
+        }
 
         /** Скидка магазина */
         if(false === empty($this->project_discount))
