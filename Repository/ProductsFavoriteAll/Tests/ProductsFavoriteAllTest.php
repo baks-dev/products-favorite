@@ -26,16 +26,25 @@ namespace BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\Tests;
 
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllInterface;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllRepository;
+use BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest;
 use BaksDev\Users\User\Type\Id\UserUid;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
 /**
  * @group products-favorite
+ * @group products-favorite-repo
+ *
  * @depends BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest::class
  */
+#[Group('products-favorite')]
+#[When(env: 'test')]
 class ProductsFavoriteAllTest extends KernelTestCase
 {
 
+    #[DependsOnClass(NewUserProductsFavoriteTest::class)]
     public function testUserRepository()
     {
         /** @var ProductsFavoriteAllRepository $AllFavorite */
