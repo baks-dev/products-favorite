@@ -5,12 +5,13 @@ namespace BaksDev\Products\Favorite\UseCase\Public\New\Tests;
 use BaksDev\Products\Favorite\UseCase\Public\New\AnonymousProductsFavoriteDTO;
 use BaksDev\Products\Favorite\UseCase\Public\New\PublicProductsFavoriteForm;
 use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
 use Symfony\Component\Form\Forms;
 
-/**
- * @group products-favorite
- */
+#[Group('products-favorite')]
+#[When(env: 'test')]
 class NewPublicProductsFavoriteTest extends WebTestCase
 {
     private const string URL = '/favorite/new';

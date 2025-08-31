@@ -33,11 +33,12 @@ use BaksDev\Products\Product\Type\Invariable\ProductInvariableUid;
 use BaksDev\Products\Product\UseCase\Admin\NewEdit\Tests\ProductsProductNewAdminUseCaseTest;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group products-favorite
- */
+#[Group('products-favorite')]
+#[When(env: 'test')]
 class NewUserProductsFavoriteTest extends KernelTestCase
 {
     public static function setUpBeforeClass(): void

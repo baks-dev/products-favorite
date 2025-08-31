@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace BaksDev\Products\Favorite\Controller\Public\Tests;
 
 use BaksDev\Users\User\Tests\TestUserAccount;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group products-favorite
- */
+#[Group('products-favorite')]
+#[When(env: 'test')]
 final class IndexControllerTest extends WebTestCase
 {
     private const URL = '/favorites';
