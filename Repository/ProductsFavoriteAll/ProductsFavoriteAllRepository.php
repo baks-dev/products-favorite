@@ -429,7 +429,6 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
         /**
          * ProductsPromotion
          */
-
         if(true === class_exists(BaksDevProductsPromotionBundle::class) && true === $dbal->isProjectProfile())
         {
             $dbal
@@ -439,8 +438,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                     'product_promotion_invariable',
                     '
                         product_promotion_invariable.product = product_invariable.id
-                        AND
-                        product_promotion_invariable.profile = :'.$dbal::PROJECT_PROFILE_KEY,
+                        AND product_promotion_invariable.profile = :'.$dbal::PROJECT_PROFILE_KEY,
                 );
 
             $dbal
@@ -452,18 +450,9 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 );
 
             $dbal
-                ->leftJoin(
-                    'product_promotion',
-                    ProductPromotionEvent::class,
-                    'product_promotion_event',
-                    '
-                        product_promotion_event.main = product_promotion.id',
-                );
-
-            $dbal
                 ->addSelect('product_promotion_price.value AS promotion_price')
                 ->leftJoin(
-                    'product_promotion_event',
+                    'product_promotion',
                     ProductPromotionPrice::class,
                     'product_promotion_price',
                     'product_promotion_price.event = product_promotion.event',
@@ -483,7 +472,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 END AS promotion_active
             ')
                 ->leftJoin(
-                    'product_promotion_event',
+                    'product_promotion',
                     ProductPromotionPeriod::class,
                     'product_promotion_period',
                     '
