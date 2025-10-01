@@ -9,5 +9,5 @@
 {% endblock %}
 
 {% block javascript %}
-    <script nonce="{{ csp_nonce() }}" async class='lazy' data-src="/assets/orders-order/share.min.js?v={{ version }}" ></script>
+<script nonce="{{ csp_nonce() }}" async class='lazy' data-src="/assets/{{ version }}/orders-order/share.min.js?v={{ version }}" ></script>
 {% endblock %}
