@@ -24,12 +24,15 @@
 
 namespace BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\Tests;
 
+use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductFavoriteAllResult;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllInterface;
 use BaksDev\Products\Favorite\Repository\ProductsFavoriteAll\ProductsFavoriteAllRepository;
 use BaksDev\Products\Favorite\UseCase\User\New\Tests\NewUserProductsFavoriteTest;
 use BaksDev\Users\User\Type\Id\UserUid;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -43,7 +46,28 @@ class ProductsFavoriteAllTest extends KernelTestCase
         /** @var ProductsFavoriteAllRepository $AllFavorite */
         $AllFavorite = self::getContainer()->get(ProductsFavoriteAllInterface::class);
 
-        $result = $AllFavorite->user(UserUid::TEST)->findUserPaginator();
+        $paginator = $AllFavorite->user(UserUid::TEST)->findUserPaginator();
+        $results = $paginator->getData();
+
+        /** @var ProductFavoriteAllResult $ProductFavoriteAllResult */
+        foreach($results as $ProductFavoriteAllResult)
+        {
+            // Вызываем все геттеры
+            $reflectionClass = new ReflectionClass(ProductFavoriteAllResult::class);
+            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+            foreach($methods as $method)
+            {
+                // Методы без аргументов
+                if($method->getNumberOfParameters() === 0)
+                {
+                    // Вызываем метод
+                    $data = $method->invoke($ProductFavoriteAllResult);
+                    // dump($data);
+                }
+            }
+
+        }
 
         self::assertTrue(true);
     }
