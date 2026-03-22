@@ -72,7 +72,7 @@ final class ProductsFavoriteDataUpdateRepository implements ProductsFavoriteData
             ->setParameter(
                 key: 'usr',
                 value: $this->usr,
-                type: UserUid::TYPE
+                type: UserUid::TYPE,
             );
 
         $orm
@@ -80,7 +80,7 @@ final class ProductsFavoriteDataUpdateRepository implements ProductsFavoriteData
             ->setParameter(
                 key: 'invariable',
                 value: $this->invariable,
-                type: ProductInvariableUid::TYPE
+                type: ProductInvariableUid::TYPE,
             );
 
         return $orm->getOneOrNullResult() ?: false;

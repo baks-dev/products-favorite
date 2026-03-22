@@ -100,7 +100,7 @@ final class IndexController extends AbstractController
                     name: $invariable,
                     type: PublicProductsFavoriteForm::class,
                     data: $ProductsFavoriteDTO,
-                    options: ['action' => $this->generateUrl('products-favorite:newedit.new', ['invariable' => $invariable])]
+                    options: ['action' => $this->generateUrl('products-favorite:newedit.new', ['invariable' => $invariable])],
                 );
 
             $forms[$invariable] = $favoriteForm->createView();
@@ -112,7 +112,7 @@ final class IndexController extends AbstractController
                 'forms' => $forms,
                 'share' => empty($key) === true ? null : $key,
                 'is_shared' => is_null($share) === false,
-            ]
+            ],
         );
     }
 }

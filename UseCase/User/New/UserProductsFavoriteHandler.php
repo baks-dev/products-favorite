@@ -43,7 +43,7 @@ final class UserProductsFavoriteHandler// extends AbstractHandler
                 ->messageDispatch->addClearCacheOther('products-favorite')
                 ->dispatch(
                     message: new ProductsFavoriteMessage(),
-                    transport: 'products-favorite'
+                    transport: 'products-favorite',
                 );
 
             return $ProductsFavorite;
@@ -69,7 +69,7 @@ final class UserProductsFavoriteHandler// extends AbstractHandler
             ->messageDispatch->addClearCacheOther('products-favorite')
             ->dispatch(
                 message: new ProductsFavoriteMessage(),
-                transport: 'products-favorite'
+                transport: 'products-favorite',
             );
 
         return $ProductsFavorite;

@@ -27,6 +27,23 @@ final class UserProductsFavoriteDTO implements ProductsFavoriteInterface
         return $this->usr;
     }
 
+    public function setUsr(UserUid|User|string $usr): self
+    {
+        if(is_string($usr))
+        {
+            $usr = new UserUid($usr);
+        }
+
+        if($usr instanceof User)
+        {
+            $usr = $usr->getId();
+        }
+
+        $this->usr = $usr;
+
+        return $this;
+    }
+
     public function getInvariable(): ProductInvariableUid
     {
         return $this->invariable;
@@ -45,23 +62,6 @@ final class UserProductsFavoriteDTO implements ProductsFavoriteInterface
         }
 
         $this->invariable = $invariable;
-
-        return $this;
-    }
-
-    public function setUsr(UserUid|User|string $usr): self
-    {
-        if(is_string($usr))
-        {
-            $usr = new UserUid($usr);
-        }
-
-        if($usr instanceof User)
-        {
-            $usr = $usr->getId();
-        }
-
-        $this->usr = $usr;
 
         return $this;
     }

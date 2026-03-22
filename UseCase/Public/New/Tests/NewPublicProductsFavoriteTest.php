@@ -26,8 +26,8 @@ class NewPublicProductsFavoriteTest extends WebTestCase
 
         $form = Forms::createFormFactory()->create(PublicProductsFavoriteForm::class, $DTO);
 
-        $client->request('POST', self::URL, [ $form->getName() =>
-            ['invariable' => ProductInvariableUid::TEST]
+        $client->request('POST', self::URL, [$form->getName() =>
+            ['invariable' => ProductInvariableUid::TEST],
         ]);
 
         self::assertResponseRedirects();

@@ -51,20 +51,21 @@ class RenderFavoriteButtonExtension extends AbstractExtension
             new TwigFunction(
                 'render_favorite_button',
                 [$this, 'renderButton'],
-                ['needs_environment' => true, 'is_safe' => ['html']]
+                ['needs_environment' => true, 'is_safe' => ['html']],
             ),
 
             new TwigFunction(
                 'array_render_favorites_forms',
                 [$this, 'renderForms'],
-                ['needs_environment' => true, 'is_safe' => ['html']]
+                ['needs_environment' => true, 'is_safe' => ['html']],
             ),
         ];
     }
 
     /**
      * @example :
-     * set forms = render_favorite_button(['2a1ea75d-c43a-7eb6-8236-71d3e3804671', '01cc2987-b6d5-7025-b518-2d5b7b6b4a10'])
+     * set forms = render_favorite_button(['2a1ea75d-c43a-7eb6-8236-71d3e3804671',
+     *     '01cc2987-b6d5-7025-b518-2d5b7b6b4a10'])
      * {{ forms['2a1ea75d-c43a-7eb6-8236-71d3e3804671']|row }}
      */
     public function renderForms(Environment $twig, array $invariables): array
@@ -123,7 +124,7 @@ class RenderFavoriteButtonExtension extends AbstractExtension
             [
                 'form' => $favoriteForm->createView(),
                 'color_tag' => $isFavorite ? 'text-primary' : 'text-secondary',
-            ]
+            ],
         );
 
     }

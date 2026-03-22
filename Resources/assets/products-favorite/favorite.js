@@ -24,7 +24,7 @@
 function addToFavorite(e)
 {
     let button = e.currentTarget;
-    let svgButton = button.querySelector('svg');
+    let svgButton = button.querySelector("svg");
 
     if(!svgButton)
     {
@@ -33,30 +33,27 @@ function addToFavorite(e)
 
     let invariable = svgButton.dataset.invariable;
 
-    fetch('/favorite/new/' + invariable, {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+    fetch("/favorite/new/" + invariable, {
+        method : "POST",
+        headers : {
+            "X-Requested-With" : "XMLHttpRequest",
         },
-        body: new FormData(button.closest('form'))
-    })
-        .then(response => response.json())
-        .then(() =>
-        {
-            toggleFavorite(svgButton);
+        body : new FormData(button.closest("form")),
+    }).then(response => response.json()).then(() =>
+    {
+        toggleFavorite(svgButton);
 
-            // Если это кнопка удаления — удаляем карточку
-            if(button.classList.contains('favorite-delete'))
+        // Если это кнопка удаления — удаляем карточку
+        if(button.classList.contains("favorite-delete"))
+        {
+            let card = button.closest("form")?.closest(".card")?.closest(".col");
+            if(card)
             {
-                let card = button.closest('form')?.closest('.card')?.closest('.col');
-                if(card)
-                {
-                    card.classList.add('fade-delete'); // Добавляем анимацию
-                    setTimeout(() => card.remove(), 500);
-                }
+                card.classList.add("fade-delete"); // Добавляем анимацию
+                setTimeout(() => card.remove(), 500);
             }
-        })
-        .catch(error => console.error('Ошибка запроса:', error));
+        }
+    }).catch(error => console.error("Ошибка запроса:", error));
 }
 
 function toggleFavorite(svgButton)
@@ -65,16 +62,16 @@ function toggleFavorite(svgButton)
     {
         return;
     }
-    svgButton.classList.toggle('text-secondary');
-    svgButton.classList.toggle('text-primary');
+    svgButton.classList.toggle("text-secondary");
+    svgButton.classList.toggle("text-primary");
 }
 
-allFavorites = document.querySelectorAll('.favorite, .favorite-delete');
+allFavorites = document.querySelectorAll(".favorite, .favorite-delete");
 
 allFavorites.forEach(favorite =>
 {
 
-    favorite.addEventListener('click', function(e)
+    favorite.addEventListener("click", function(e)
     {
 
         e.preventDefault();

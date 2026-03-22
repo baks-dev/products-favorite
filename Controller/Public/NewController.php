@@ -75,7 +75,7 @@ final class NewController extends AbstractController
             ->createNamed(
                 name: $formName,
                 type: PublicProductsFavoriteForm::class,
-                data: $ProductsFavoriteDTO
+                data: $ProductsFavoriteDTO,
             )
             ->handleRequest($request);
 
@@ -98,7 +98,7 @@ final class NewController extends AbstractController
         $this->addFlash(
             'danger',
             'delete.message',
-            'favorite'
+            'favorite',
         );
 
         return $this->redirectToRoute('products-favorite:public.index');

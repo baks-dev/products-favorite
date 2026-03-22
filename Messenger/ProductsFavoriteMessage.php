@@ -9,6 +9,5 @@ use Symfony\Component\DependencyInjection\Attribute\Exclude;
 #[Exclude]
 final class ProductsFavoriteMessage
 {
-    public function __construct()
-    {}
+    public function __construct() {}
 }

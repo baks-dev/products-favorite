@@ -125,26 +125,8 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'favorite',
                 ProductInvariable::class,
                 'product_invariable',
-                'product_invariable.id = favorite.invariable'
+                'product_invariable.id = favorite.invariable',
             );
-
-        $dbal->allGroupByExclude();
-
-        return $this->paginator->fetchAllHydrate($dbal, ProductFavoriteAllResult::class);
-    }
-
-    public function findPublicPaginator(): PaginatorInterface
-    {
-        $favoriteProducts = $this->session->get('favorite') ?? [];
-
-        $dbal = $this->builder();
-
-        $dbal
-            ->addSelect('product_invariable.id as product_invariable_id')
-            ->addSelect('product_invariable.offer AS product_invariable_offer_const')
-            ->from(ProductInvariable::class, 'product_invariable')
-            ->where('product_invariable.id IN (:favoriteProducts)')
-            ->setParameter('favoriteProducts', array_values($favoriteProducts), ArrayParameterType::STRING);
 
         $dbal->allGroupByExclude();
 
@@ -164,7 +146,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_invariable',
                 Product::class,
                 'product',
-                'product.id = product_invariable.product'
+                'product.id = product_invariable.product',
             );
 
         /** OFFER */
@@ -177,7 +159,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_invariable',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product.event AND product_offer.const = product_invariable.offer'
+                'product_offer.event = product.event AND product_offer.const = product_invariable.offer',
             );
 
         /** Получаем тип торгового предложения */
@@ -187,7 +169,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         /** VARIATION */
@@ -200,7 +182,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = product_invariable.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = product_invariable.variation',
             );
 
         /** Получаем тип множественного варианта */
@@ -210,7 +192,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_offer_variation',
-                'category_offer_variation.id = product_variation.category_variation'
+                'category_offer_variation.id = product_variation.category_variation',
             );
 
         /** MODIFICATION */
@@ -223,7 +205,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = product_invariable.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = product_invariable.modification',
             );
 
         /** Получаем тип множественного варианта */
@@ -233,7 +215,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         /**  Название */
@@ -243,7 +225,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local',
             );
 
         /** Фото */
@@ -253,7 +235,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product',
                 ProductPhoto::class,
                 'product_photo',
-                'product_photo.event = product.event AND product_photo.root = TRUE'
+                'product_photo.event = product.event AND product_photo.root = TRUE',
             );
 
         $dbal
@@ -261,7 +243,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_offer',
                 ProductOfferImage::class,
                 'product_offer_images',
-                'product_offer_images.offer = product_offer.id AND product_offer_images.root = TRUE'
+                'product_offer_images.offer = product_offer.id AND product_offer_images.root = TRUE',
             );
 
         $dbal
@@ -269,7 +251,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_variation',
                 ProductVariationImage::class,
                 'product_variation_images',
-                'product_variation_images.variation = product_variation.id AND product_variation_images.root = TRUE'
+                'product_variation_images.variation = product_variation.id AND product_variation_images.root = TRUE',
             );
 
         $dbal
@@ -277,7 +259,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_modification',
                 ProductModificationImage::class,
                 'product_modification_images',
-                'product_modification_images.modification = product_modification.id AND product_modification_images.root = TRUE'
+                'product_modification_images.modification = product_modification.id AND product_modification_images.root = TRUE',
             );
 
         $dbal->addSelect(
@@ -316,7 +298,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                             'img_ext', product_photo.ext,
                             'img_cdn', product_photo.cdn
                         )
-                    END) AS product_images"
+                    END) AS product_images",
         );
 
 
@@ -326,7 +308,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
             'product',
             ProductPrice::class,
             'product_price',
-            'product_price.event = product.event'
+            'product_price.event = product.event',
         );
 
         /* Цена торгового предложения */
@@ -334,7 +316,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
             'product_offer',
             ProductOfferPrice::class,
             'product_offer_price',
-            'product_offer_price.offer = product_offer.id'
+            'product_offer_price.offer = product_offer.id',
         );
 
         /* Цена множественного варианта */
@@ -342,7 +324,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
             'product_variation',
             ProductVariationPrice::class,
             'product_variation_price',
-            'product_variation_price.variation = product_variation.id'
+            'product_variation_price.variation = product_variation.id',
         );
 
         /* Цена модификации множественного варианта */
@@ -350,7 +332,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
             'product_modification',
             ProductModificationPrice::class,
             'product_modification_price',
-            'product_modification_price.modification = product_modification.id'
+            'product_modification_price.modification = product_modification.id',
         );
 
         /** Наличие для добавления в корзину */
@@ -360,7 +342,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_offer',
                 ProductOfferQuantity::class,
                 'product_offer_quantity',
-                'product_offer_quantity.offer = product_offer.id'
+                'product_offer_quantity.offer = product_offer.id',
             );
 
         /* Наличие и резерв множественного варианта */
@@ -369,7 +351,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_variation',
                 ProductVariationQuantity::class,
                 'product_variation_quantity',
-                'product_variation_quantity.variation = product_variation.id'
+                'product_variation_quantity.variation = product_variation.id',
             );
 
         $dbal
@@ -377,7 +359,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_modification',
                 ProductModificationQuantity::class,
                 'product_modification_quantity',
-                'product_modification_quantity.modification = product_modification.id'
+                'product_modification_quantity.modification = product_modification.id',
             );
 
         $dbal
@@ -386,7 +368,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product',
                 ProductEvent::class,
                 'product_event',
-                'product_event.id = product.event'
+                'product_event.id = product.event',
             );
 
         /* Категория товара */
@@ -396,7 +378,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_event',
                 ProductCategory::class,
                 'product_category',
-                'product_category.event = product_event.id AND product_category.root IS TRUE'
+                'product_category.event = product_event.id AND product_category.root IS TRUE',
             );
 
         $dbal
@@ -405,7 +387,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product_event',
                 CategoryProduct::class,
                 'category',
-                'category.id = product_category.category'
+                'category.id = product_category.category',
             );
 
         $dbal
@@ -423,7 +405,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                 'product',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
         /**
@@ -490,7 +472,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                     UserProfile::class,
                     'current_profile',
                     '
-                        current_profile.id = :'.$dbal::CURRENT_PROFILE_KEY
+                        current_profile.id = :'.$dbal::CURRENT_PROFILE_KEY,
                 );
 
             $dbal
@@ -501,7 +483,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                     'current_profile_discount',
                     '
                         current_profile_discount.event = current_profile.event
-                        '
+                        ',
                 );
         }
 
@@ -515,7 +497,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                     UserProfile::class,
                     'project_profile',
                     '
-                        project_profile.id = :'.$dbal::PROJECT_PROFILE_KEY
+                        project_profile.id = :'.$dbal::PROJECT_PROFILE_KEY,
                 );
 
             $dbal
@@ -525,7 +507,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                     UserProfileDiscount::class,
                     'project_profile_discount',
                     '
-                        project_profile_discount.event = project_profile.event'
+                        project_profile_discount.event = project_profile.event',
                 );
         }
 
@@ -596,10 +578,28 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
 			   THEN product_price.currency
 			   
 			   ELSE NULL
-			END AS product_currency"
+			END AS product_currency",
         );
 
         return $dbal;
+    }
+
+    public function findPublicPaginator(): PaginatorInterface
+    {
+        $favoriteProducts = $this->session->get('favorite') ?? [];
+
+        $dbal = $this->builder();
+
+        $dbal
+            ->addSelect('product_invariable.id as product_invariable_id')
+            ->addSelect('product_invariable.offer AS product_invariable_offer_const')
+            ->from(ProductInvariable::class, 'product_invariable')
+            ->where('product_invariable.id IN (:favoriteProducts)')
+            ->setParameter('favoriteProducts', array_values($favoriteProducts), ArrayParameterType::STRING);
+
+        $dbal->allGroupByExclude();
+
+        return $this->paginator->fetchAllHydrate($dbal, ProductFavoriteAllResult::class);
     }
 
     public function analyze(): void
