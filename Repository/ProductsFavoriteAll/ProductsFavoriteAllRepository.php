@@ -121,7 +121,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
         $dbal
             ->addSelect('product_invariable.id as product_invariable_id')
             ->addSelect('product_invariable.offer AS product_invariable_offer_const')
-            ->leftJoin(
+            ->join(
                 'favorite',
                 ProductInvariable::class,
                 'product_invariable',
