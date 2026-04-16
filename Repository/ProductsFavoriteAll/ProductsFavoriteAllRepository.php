@@ -60,12 +60,17 @@ use BaksDev\Products\Promotion\Entity\Event\Period\ProductPromotionPeriod;
 use BaksDev\Products\Promotion\Entity\Event\Price\ProductPromotionPrice;
 use BaksDev\Products\Promotion\Entity\Event\ProductPromotionEvent;
 use BaksDev\Products\Promotion\Entity\ProductPromotion;
+use BaksDev\Products\Stocks\BaksDevProductsStocksBundle;
+use BaksDev\Products\Stocks\Entity\Total\ProductStockTotal;
+use BaksDev\Reference\Region\Type\Id\RegionUid;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\Discount\UserProfileDiscount;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Region\UserProfileRegion;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\ArrayParameterType;
 use InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterface
@@ -77,6 +82,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
         private readonly PaginatorInterface $paginator,
+        #[Autowire(env: 'PROJECT_REGION')] private readonly ?string $region = null,
     ) {}
 
     public function user(User|UserUid|string $usr): self
@@ -485,6 +491,81 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
                         current_profile_discount.event = current_profile.event
                         ',
                 );
+        }
+
+        /**
+         * Наличие продукции на складе (необходимо для отображения кнопки "в корзину")
+         * Если подключен модуль складского учета и передан идентификатор профиля
+         */
+
+        if(false === empty($this->region) && class_exists(BaksDevProductsStocksBundle::class))
+        {
+            /* Получить все профили данного региона */
+
+            $dbal
+                ->leftJoin(
+                    'product',
+                    UserProfileRegion::class,
+                    'product_profile_region',
+                    'product_profile_region.value = :region',
+                )
+                ->setParameter(
+                    key: 'region',
+                    value: $this->region,
+                    type: RegionUid::TYPE,
+                );
+
+            $dbal
+                ->join(
+                    'product_profile_region',
+                    UserProfile::class,
+                    'product_region_total',
+                    'product_region_total.event = product_profile_region.event',
+                );
+
+            $dbal
+                ->addSelect("JSON_AGG (
+                        DISTINCT JSONB_BUILD_OBJECT (
+                            'total', stock.total,
+                            'reserve', stock.reserve
+                        )) FILTER (WHERE stock.total > stock.reserve)
+
+                        AS product_quantity_stocks",
+                )
+                ->leftJoin(
+                    'product_region_total',
+                    ProductStockTotal::class,
+                    'stock',
+                    '
+                    stock.profile = product_region_total.id AND
+                    stock.product = product.id
+
+                    AND
+
+                        CASE
+                            WHEN product_offer.const IS NOT NULL
+                            THEN stock.offer = product_offer.const
+                            ELSE stock.offer IS NULL
+                        END
+
+                    AND
+
+                        CASE
+                            WHEN product_variation.const IS NOT NULL
+                            THEN stock.variation = product_variation.const
+                            ELSE stock.variation IS NULL
+                        END
+
+                    AND
+
+                        CASE
+                            WHEN product_modification.const IS NOT NULL
+                            THEN stock.modification = product_modification.const
+                            ELSE stock.modification IS NULL
+                        END
+      
+                ');
+
         }
 
         /** Общая скидка (наценка) из профиля магазина */
