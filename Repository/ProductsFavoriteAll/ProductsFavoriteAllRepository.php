@@ -504,7 +504,7 @@ final class ProductsFavoriteAllRepository implements ProductsFavoriteAllInterfac
 
             $dbal
                 ->leftJoin(
-                    'product',
+                    'product_invariable',
                     UserProfileRegion::class,
                     'product_profile_region',
                     'product_profile_region.value = :region',
